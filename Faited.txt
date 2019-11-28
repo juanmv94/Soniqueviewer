@@ -1,0 +1,35 @@
+Faited 1.01 - Sonique Visualisation Plugin
+	Created by mykel
+
+Contact: mykel@earthling.net
+
+Description/Instructions:
+	Thought I'd have a play with some pretty coloured dots.  Size,
+	position, speed of rotation and speed of colour change all change
+	with the music.
+
+	The only config options worth worrying about are
+
+		[faited]
+		Seasick=0 or 1
+		Blocky=0 or 1
+
+	If seasick is 1, there is a mild wave on the movement.
+	Blocky determines how individual points are drawn.  If
+	you have blocky=0 I would suggest blur & smoke buy no
+	zoom at about 75%.  With blocky=1 (the default) the
+	vis FX settings have less (but some) impact.
+
+	Changes should be made in the sonique.ini in your
+	windows directory, or, if you've got a more recent
+	version, vis.ini in the sonique install directory.
+
+Development:
+	Not having Visual C++, nor indeed much in the way of graphics
+	tools, this is all done from scratch in Borland C++, which
+	probably explains why it is so horribly processor intensive.
+
+Comments, questions, suggestions, abuse all welcome at
+	mykel@earthling.net
+
+.. actually, not so much of the abuse.

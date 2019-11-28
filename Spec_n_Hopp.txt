@@ -1,0 +1,45 @@
+------------------------------
+|      Spec'n'Hopp 1.1       |
+|                            |
+| a Sonique visual plugin by |
+|                            |
+|    Robert Wenzel (CoR)     |
+|                            |
+|  coded in feb/march 2000   |
+------------------------------
+
+version 1.1
+	features an interactive settings editor
+	just click the vis in nav mode and change the
+	settings you like
+
+Hi sonique fans !!
+
+here comes another visual from CoR...
+Spec'n'Hopp is a vis that forms the spectrum data
+to eight 3d columns reacting to the music.
+The floor of the plugin is well polished so that
+the spectrum is reflected by it ;)
+In addition to this there are few (or more if
+requested, up to 200) little funny hoppers jumping
+over the floor of the vis.
+
+search your vis.ini for following lines to change
+the setting of the vis:
+
+[CoR's Spec'n'Hopp 1.0]
+Enable_3d_Spectrum=1		: 0 = spectrum off
+Enable_Grid=1			: 0 = grid off
+Hopper_Speed=1.0
+Hopper's_Head_Size=10.0
+Number_of_Hoppers(max_200)=40	: try 200 with grid off and spectrum off 
+Number_of_Stars(max_1000)=1000
+
+thanks "hopp" out to:
+	ian, sam for helping me with testing and design !!
+	and all who wrote me mails asking for a new plugin
+	you guys can't see me sleeping ? ;)
+
+enjoy...........
+
+CoR

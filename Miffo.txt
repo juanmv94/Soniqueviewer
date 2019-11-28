@@ -1,0 +1,17 @@
+miffo v1.0 :: psikorp '99
+
+This small vis was created by illuminator / psikorp
+
+written in about two days or something
+
+put it in your ..sonique\vis and restart the best player ever created
+
+you cant configure anything yet
+
+the starfield is antialiased
+
+the flares are 64x64, thats why they are so ugly
+
+it looks best as background-vis
+
+want to contact me, do it: possan@mail.wineasy.se
