@@ -5,6 +5,8 @@
 #include "SDL2/SDL.h"
 #include "vis.h"
 
+#define DUMPFILE "soniquevideodump.raw"
+
 //#define MIN(a,b) ((a<b)?a:b)
 //#define MAX(a,b) ((a>b)?a:b)
 
@@ -68,7 +70,13 @@ int main(int argc, char ** argv)
   int XS=640;
   int YS=400;
   int delay=40;
+  int dumpframes=0;
+  int framecount=0;
   bool zoomandblur=true;
+  
+  SDL_Window* SDLwindow;
+  SDL_Renderer* renderer;
+  SDL_Texture* bitmap_tex;
   
   for (int i=2;i<argc;i+=2) {
 	  if (argv[i][0]!='-' || strlen(argv[i])!=2) {correctparameters=false; break;}
@@ -84,6 +92,10 @@ int main(int argc, char ** argv)
 		  }
 		  case 'f': {
 			  delay=1000/atoi(argv[i+1]);
+			  break;
+		  }
+		  case 'F': {
+			  dumpframes=atoi(argv[i+1]);
 			  break;
 		  }
 		  case 'w': {
@@ -109,7 +121,7 @@ int main(int argc, char ** argv)
 	  if (!correctparameters) break;
   }
   if (!correctparameters) {
-	  cout<<"Wrong arguments. Usage example: " << std::endl << argv[0] << " Spec_n_Hopp.svp [-r 640x400][-w defaultwaveform.raw][-s defaultspectrum.raw][-v vis.ini][-f 25][-z 1]" << std::endl;
+	  cout<<"Wrong arguments. Usage example: " << std::endl << argv[0] << " Spec_n_Hopp.svp [-r 640x400][-w defaultwaveform.raw][-s defaultspectrum.raw][-v vis.ini][-f 25 / -F 250][-z 1]" << std::endl;
 	  return EXIT_FAILURE;
   }
 	
@@ -134,6 +146,7 @@ int main(int argc, char ** argv)
   VisInfo* vi=funci();
   cout << "----- " << vi->PluginName << " -----" << std::endl << std::endl;
   ifstream waveform,spectrum;
+  ofstream dump;
   char *memwaveform, *memspectrum;
   unsigned long waveformsize,spectrumsize;
   unsigned long waveformcur=0,spectrumcur=0;
@@ -177,15 +190,23 @@ int main(int argc, char ** argv)
   
   if (vi->Version > 0) cout << "This efect has mouse support" << std::endl;
   
-  if (SDL_Init(SDL_INIT_VIDEO)) {
-    cout << "could not init SDL" << std::endl;
-    return EXIT_FAILURE;
+  if (!dumpframes) {
+	  if (SDL_Init(SDL_INIT_VIDEO)) {
+		cout << "could not init SDL" << std::endl;
+		return EXIT_FAILURE;
+	  }
+	  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "best");
+	  SDLwindow = SDL_CreateWindow(vi->PluginName, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, XS, YS, 0);
+	  renderer = SDL_CreateRenderer(SDLwindow, -1, 0);
+	  bitmap_tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, XS, YS);
+	  //SDL_SetTextureBlendMode( bitmap_tex, SDL_BLENDMODE_BLEND );
+  } else {
+	  dump.open(DUMPFILE,ios::binary);
+	  if (!dump.is_open()) {
+		  cout << "Could not create dump file" << std::endl;
+		  return EXIT_FAILURE;
+	  }
   }
-  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "best");
-  SDL_Window * SDLwindow = SDL_CreateWindow(vi->PluginName, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, XS, YS, 0);
-  SDL_Renderer * renderer = SDL_CreateRenderer(SDLwindow, -1, 0);
-  SDL_Texture* bitmap_tex = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, XS, YS);
-  //SDL_SetTextureBlendMode( bitmap_tex, SDL_BLENDMODE_BLEND );
   int bitmap_pitch=XS*sizeof(unsigned long);
     
   //vi->ReceiveQueryInterface(NULL);
@@ -220,41 +241,49 @@ int main(int argc, char ** argv)
 	  vi->Render(v, XS, YS, XS, vd);
 	  //for (int j=0;j<(XS*YS);j++) v[j]|=ALPHA_MASK;
 	  
-	  unsigned int newticks=SDL_GetTicks();
-	  int del=delay-(int)(newticks-lastticks);
-	  if (del>0) SDL_Delay(del);
-	  lastticks=newticks;
+	  framecount++;
 	  
-	  SDL_UpdateTexture(bitmap_tex,NULL,v,bitmap_pitch);
-      SDL_RenderCopy(renderer, bitmap_tex, NULL, NULL);
-	  SDL_RenderPresent(renderer);
-	  
-	  //Events
-	  SDL_Event event;
-	  SDL_PollEvent(&event);
-	  if ((event.type==SDL_WINDOWEVENT && event.window.event==SDL_WINDOWEVENT_CLOSE) ||
-            (event.type==SDL_KEYDOWN && event.key.keysym.sym==SDLK_ESCAPE)) {
-        break;
-      }
-	  else if (event.type==SDL_KEYDOWN && event.key.keysym.sym==SDLK_RETURN) {
-		  bool isFullScreen=SDL_GetWindowFlags(SDLwindow) & SDL_WINDOW_FULLSCREEN;
-		  SDL_SetWindowFullscreen(SDLwindow, isFullScreen ? 0 : SDL_WINDOW_FULLSCREEN);
-	  }
-	  else if (event.type==SDL_MOUSEBUTTONDOWN && vi->Version>0) {
-		  int x, y;
-          SDL_GetMouseState( &x, &y );
-		  switch (event.button.button&mousebuttons) {
-			  case SDL_BUTTON_LEFT:
-			  vi->Clicked(x,y,1);
-			  break;
-			  case SDL_BUTTON_RIGHT:
-			  vi->Clicked(x,y,2);
-			  break;
+	  if (!dumpframes) { 
+		  unsigned int newticks=SDL_GetTicks();
+		  int del=delay-(int)(newticks-lastticks);
+		  if (del>0) SDL_Delay(del);
+		  lastticks=newticks;
+		  
+		  SDL_UpdateTexture(bitmap_tex,NULL,v,bitmap_pitch);
+		  SDL_RenderCopy(renderer, bitmap_tex, NULL, NULL);
+		  SDL_RenderPresent(renderer);
+		  
+		  //Events
+		  SDL_Event event;
+		  SDL_PollEvent(&event);
+		  if ((event.type==SDL_WINDOWEVENT && event.window.event==SDL_WINDOWEVENT_CLOSE) ||
+				(event.type==SDL_KEYDOWN && event.key.keysym.sym==SDLK_ESCAPE)) {
+			break;
 		  }
-		  mousebuttons&=(0xFF-event.button.button);
-	  }
-	  else if (event.type==SDL_MOUSEBUTTONUP && vi->Version>0) {
-		  mousebuttons|=event.button.button;
+		  else if (event.type==SDL_KEYDOWN && event.key.keysym.sym==SDLK_RETURN) {
+			  bool isFullScreen=SDL_GetWindowFlags(SDLwindow) & SDL_WINDOW_FULLSCREEN;
+			  SDL_SetWindowFullscreen(SDLwindow, isFullScreen ? 0 : SDL_WINDOW_FULLSCREEN);
+		  }
+		  else if (event.type==SDL_MOUSEBUTTONDOWN && vi->Version>0) {
+			  int x, y;
+			  SDL_GetMouseState( &x, &y );
+			  switch (event.button.button&mousebuttons) {
+				  case SDL_BUTTON_LEFT:
+				  vi->Clicked(x,y,1);
+				  break;
+				  case SDL_BUTTON_RIGHT:
+				  vi->Clicked(x,y,2);
+				  break;
+			  }
+			  mousebuttons&=(0xFF-event.button.button);
+		  }
+		  else if (event.type==SDL_MOUSEBUTTONUP && vi->Version>0) {
+			  mousebuttons|=event.button.button;
+		  }
+	  } else {
+		  dump.write((const char*)v,XS*YS*sizeof(unsigned long));
+		  cout << "frame " << framecount << "/" << dumpframes << std::endl;
+		  if (framecount==dumpframes) break;
 	  }
 	  
   }
@@ -262,9 +291,13 @@ int main(int argc, char ** argv)
   delete[] v;
   if ((vi->lRequired & SONIQUEVISPROC) && zoomandblur) delete[] vt;
   
-  SDL_DestroyTexture(bitmap_tex);
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(SDLwindow);
-  SDL_Quit();
+  if (!dumpframes) {
+	  SDL_DestroyTexture(bitmap_tex);
+	  SDL_DestroyRenderer(renderer);
+	  SDL_DestroyWindow(SDLwindow);
+	  SDL_Quit();
+  } else {
+	  dump.close();
+  }
   return EXIT_SUCCESS;
 }

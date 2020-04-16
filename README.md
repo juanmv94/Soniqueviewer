@@ -28,7 +28,7 @@ The SVP file must be the first argument, the following are optional and default 
 * **-w**: use this to use custom waveform file
 * **-s**: use this to use custom spectrum file
 * **-v**: use this to use custom vis.ini file
-* **-f**: limit the framerate
+* **-f**: limit the framerate / **-F**: don't show the visualization in a window, dump **F**rames in rawvideo to file instead
 * **-z**: use (1) or not (0) the soniqueviewer zoom and blur function when needed.
 
 ## Controls
