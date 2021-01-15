@@ -32,7 +32,7 @@ Enable_3d_Spectrum=1		: 0 = spectrum off
 Enable_Grid=1			: 0 = grid off
 Hopper_Speed=1.0
 Hopper's_Head_Size=10.0
-Number_of_Hoppers(max_200)=40	: try 200 with grid off and spectrum off 
+Number_of_Hoppers(max_200)=40	: try 200 with grid off and spectrum off
 Number_of_Stars(max_1000)=1000
 
 thanks "hopp" out to:

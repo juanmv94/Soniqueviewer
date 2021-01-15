@@ -16,7 +16,7 @@ BOOL Render(unsigned long *Video, int width, int height, int pitch, VisData* pVD
 	for (int i=0;i<512;i++) {
 		waveform.write((const char*)&(pVD->Waveform[0][i]),2);
 	}
-	
+
 	for (int i=0;i<256;i++) {
 		spectrum.write((const char*)&(pVD->Spectrum[1][i]),2);
 	}

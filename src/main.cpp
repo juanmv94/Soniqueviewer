@@ -73,11 +73,11 @@ int main(int argc, char ** argv)
   int dumpframes=0;
   int framecount=0;
   bool zoomandblur=true;
-  
+
   SDL_Window* SDLwindow;
   SDL_Renderer* renderer;
   SDL_Texture* bitmap_tex;
-  
+
   for (int i=2;i<argc;i+=2) {
 	  if (argv[i][0]!='-' || strlen(argv[i])!=2) {correctparameters=false; break;}
 	  if ((i+1)==argc) {correctparameters=false; break;}
@@ -124,7 +124,7 @@ int main(int argc, char ** argv)
 	  cout<<"Wrong arguments. Usage example: " << std::endl << argv[0] << " Spec_n_Hopp.svp [-r 640x400][-w defaultwaveform.raw][-s defaultspectrum.raw][-v vis.ini][-f 25 / -F 250][-z 1]" << std::endl;
 	  return EXIT_FAILURE;
   }
-	
+
   HINSTANCE hGetProcIDDLL = LoadLibrary(argv[1]);
 
   if (!hGetProcIDDLL) {
@@ -138,11 +138,11 @@ int main(int argc, char ** argv)
     cout << "Wrong svp file" << std::endl;
     return EXIT_FAILURE;
   }
-  
+
   unsigned long *v=new unsigned long[XS*YS];	//video buffer
   unsigned long *vt;							//Temporal video buffer for customzoomandblur
   unsigned char mousebuttons=0xFF;
-  
+
   VisInfo* vi=funci();
   cout << "----- " << vi->PluginName << " -----" << std::endl << std::endl;
   ifstream waveform,spectrum;
@@ -151,7 +151,7 @@ int main(int argc, char ** argv)
   unsigned long waveformsize,spectrumsize;
   unsigned long waveformcur=0,spectrumcur=0;
   if (vi->lRequired & VI_WAVEFORM) {
-	  cout << "This efect requires waveform"<< std::endl;
+	  cout << "This effect requires waveform"<< std::endl;
 	  waveform.open(customwaveform ? customwaveform : defaultwaveform, ios::binary);
 	  if (!waveform.is_open()) {
 		  cout << "Could not locate waveform file" << std::endl;
@@ -165,7 +165,7 @@ int main(int argc, char ** argv)
 	  waveform.read(memwaveform,waveformsize);
   }
   if (vi->lRequired & VI_SPECTRUM) {
-	  cout << "This efect requires spectrum"<< std::endl;
+	  cout << "This effect requires spectrum"<< std::endl;
 	  spectrum.open(customspectrum ? customspectrum : defaultspectrum, ios::binary);
 	  if (!spectrum.is_open()) {
 		  cout << "Could not locate spectrum file" << std::endl;
@@ -180,16 +180,16 @@ int main(int argc, char ** argv)
   }
   if (vi->lRequired & SONIQUEVISPROC) {
 	  if (zoomandblur) {
-		cout << "This efect enables native Sonique blur and zoom efect and will be simulated" << std::endl;
+		cout << "This effect enables native Sonique blur and zoom effect and will be simulated" << std::endl;
 		vt=new unsigned long[XS*YS];
 	  }
 	  else {
-		  cout << "This efect enables native Sonique blur and zoom efect and will NOT be simulated" << std::endl;
+		  cout << "This effect enables native Sonique blur and zoom effect and will NOT be simulated" << std::endl;
 	  }
   }
-  
-  if (vi->Version > 0) cout << "This efect has mouse support" << std::endl;
-  
+
+  if (vi->Version > 0) cout << "This effect has mouse support" << std::endl;
+
   if (!dumpframes) {
 	  if (SDL_Init(SDL_INIT_VIDEO)) {
 		cout << "could not init SDL" << std::endl;
@@ -208,7 +208,7 @@ int main(int argc, char ** argv)
 	  }
   }
   int bitmap_pitch=XS*sizeof(unsigned long);
-    
+
   //vi->ReceiveQueryInterface(NULL);
   vi->OpenSettings(customvis ? customvis : defaultvis);
   vi->Initialize();
@@ -216,7 +216,7 @@ int main(int argc, char ** argv)
   unsigned int lastticks=0;
   while(1) {
 	  vd->MillSec=lastticks;
-	  
+
 	  if (vi->lRequired & VI_WAVEFORM) {
 		  if ((waveformcur+2*512)>waveformsize) waveformcur=0;
 		  for (int i=0;i<512;i++) {
@@ -225,7 +225,7 @@ int main(int argc, char ** argv)
 			vd->Waveform[1][i]=memwaveform[waveformcur++];
 		  }
 	  }
-	  
+
 	  if (vi->lRequired & VI_SPECTRUM) {
 		  if ((spectrumcur+2*256)>spectrumsize) spectrumcur=0;
 		  for (int i=0;i<256;i++) {
@@ -240,19 +240,19 @@ int main(int argc, char ** argv)
 	  }
 	  vi->Render(v, XS, YS, XS, vd);
 	  //for (int j=0;j<(XS*YS);j++) v[j]|=ALPHA_MASK;
-	  
+
 	  framecount++;
-	  
-	  if (!dumpframes) { 
+
+	  if (!dumpframes) {
 		  unsigned int newticks=SDL_GetTicks();
 		  int del=delay-(int)(newticks-lastticks);
 		  if (del>0) SDL_Delay(del);
 		  lastticks=newticks;
-		  
+
 		  SDL_UpdateTexture(bitmap_tex,NULL,v,bitmap_pitch);
 		  SDL_RenderCopy(renderer, bitmap_tex, NULL, NULL);
 		  SDL_RenderPresent(renderer);
-		  
+
 		  //Events
 		  SDL_Event event;
 		  SDL_PollEvent(&event);
@@ -285,12 +285,12 @@ int main(int argc, char ** argv)
 		  cout << "frame " << framecount << "/" << dumpframes << std::endl;
 		  if (framecount==dumpframes) break;
 	  }
-	  
+
   }
-  if (vi->Version > 0) vi->Deinit();	//It seems that Deinit() first comes with version 1 efects
+  if (vi->Version > 0) vi->Deinit();	//It seems that Deinit() first comes with version 1 effects
   delete[] v;
   if ((vi->lRequired & SONIQUEVISPROC) && zoomandblur) delete[] vt;
-  
+
   if (!dumpframes) {
 	  SDL_DestroyTexture(bitmap_tex);
 	  SDL_DestroyRenderer(renderer);

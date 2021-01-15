@@ -1,5 +1,4 @@
-
-// Note! 
+// Note!
 // *Video points to memory in 32bit video memory, ie, the following can be used
 // for your utility and to help your understanding of the pixel format used.
 
@@ -48,13 +47,13 @@
 
 
 #define VI_WAVEFORM			0x0001		// set if you need the waveform
-#define VI_SPECTRUM			0x0002		// set if you need the FFT values 
+#define VI_SPECTRUM			0x0002		// set if you need the FFT values
 #define SONIQUEVISPROC		0x0004		// set if you want to allow Soniques user pref vis to affect your vis
 										//   for example - blur, smoke and zoom
 
 #pragma pack (push, 8)
 
-typedef struct 
+typedef struct
 {
 	unsigned long	MillSec;			// Sonique sets this to the time stamp of end this block of data
 	unsigned char	Waveform[2][512];	// Sonique sets this to the PCM data being outputted at this time
